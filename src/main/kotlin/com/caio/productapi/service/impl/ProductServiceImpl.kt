@@ -19,8 +19,12 @@ class ProductServiceImpl(
 
     override fun getProduct(id: Long): ResponseEntity<Any>{
         return try {
-            val product: Product = productRepository.getById(id)
-            ResponseEntity.ok(product)
+            val product = productRepository.findById(id)
+            return if(product.isPresent){
+                ResponseEntity.ok(product.get())
+            }else{
+                ResponseEntity.badRequest().body("Error fetching the product | Product not found")
+            }
         }catch (e: Exception){
             ResponseEntity.badRequest().body("Error fetching the product")
         }
@@ -44,13 +48,33 @@ class ProductServiceImpl(
         }
     }
 
-    override fun updateProduct(id: Long): ResponseEntity<Any> {
-        TODO("Not yet implemented")
+    override fun updateProduct(id: Long, productDto: ProductDto): ResponseEntity<Any> {
+        return try {
+            val product = productRepository.findById(id)
+            if(product.isPresent) {
+                productRepository.save(this.update(productDto = productDto, product = product.get()))
+            }else{
+                return ResponseEntity.badRequest().body("Error updating the product | Product not found")
+            }
+            return ResponseEntity.ok("Atualizado com sucesso")
+        }catch (e: Exception){
+            ResponseEntity.badRequest().body("Error updating the product")
+        }
     }
 
     override fun deleteProduct(id: Long): ResponseEntity<Any> {
-        TODO("Not yet implemented")
+        return try{
+            productRepository.deleteById(id)
+            return ResponseEntity.ok("Successfully deleted")
+        }catch (e: Exception){
+            ResponseEntity.badRequest().body("Error deleting the product")
+        }
     }
 
+
+    fun update(productDto: ProductDto, product: Product ):Product{
+        product.value = productDto.value
+        return product
+    }
 
 }

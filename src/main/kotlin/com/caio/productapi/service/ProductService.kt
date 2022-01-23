@@ -9,6 +9,6 @@ interface ProductService {
     fun getProduct(id: Long): ResponseEntity<Any>
     fun getProducts(): ResponseEntity<Any>
     fun insertProduct(product: ProductDto, uriBuilder: UriComponentsBuilder): ResponseEntity<Any>
-    fun updateProduct(id: Long): ResponseEntity<Any>
+    fun updateProduct(id: Long, product: ProductDto): ResponseEntity<Any>
     fun deleteProduct(id: Long): ResponseEntity<Any>
 }

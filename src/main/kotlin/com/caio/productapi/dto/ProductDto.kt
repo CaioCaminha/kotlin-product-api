@@ -8,7 +8,7 @@ data class ProductDto(
     val title: String,
     val description: String,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
-    val value: BigDecimal
+    var value: BigDecimal
 ){
 
     fun convertToEntity(): Product{
