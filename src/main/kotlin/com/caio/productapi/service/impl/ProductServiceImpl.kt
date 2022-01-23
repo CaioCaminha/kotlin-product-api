@@ -4,6 +4,7 @@ import com.caio.productapi.dto.ProductDto
 import com.caio.productapi.entity.Product
 import com.caio.productapi.repository.ProductRepository
 import com.caio.productapi.service.ProductService
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriBuilder
@@ -30,9 +31,9 @@ class ProductServiceImpl(
         }
     }
 
-    override fun getProducts(): ResponseEntity<Any> {
+    override fun getProducts(pageable: Pageable ): ResponseEntity<Any> {
         return try {
-            ResponseEntity.ok(productRepository.findAll());
+            ResponseEntity.ok(productRepository.findAll(pageable));
         }catch (e: Exception){
             ResponseEntity.badRequest().body("Error fetching the products")
         }
