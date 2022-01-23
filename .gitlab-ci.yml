@@ -1,0 +1,42 @@
+image: docker:stable
+
+stages:
+  - build
+  - package
+  - deploy
+
+services:
+  - docker:dind
+  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
+
+maven-buid:
+  image: maven:3-jdk-8
+  stage: build
+  script: "mvn clean package"
+  artifacts:
+    paths:
+      - target/*.jar
+
+docker-build:
+  stage: package
+  script:
+    - docker build -t dock-product-api .
+    - docker tag dock-product-api caminhacaio/dock-product-api:latest
+    - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
+    - docker push caminhacaio/dock-product-api
+  dependencies:
+    - maven-build
+
+application-deploy:
+  image: ubuntu:latest
+  stage: deploy
+  before_script:
+    - apt-get update
+    - apt-get install openssh-server -y
+    - service ssh start
+    - eval $(ssh-agent -s)
+    - echo "$DOCK_PRODUCT_API" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no ubuntu@ec2-54-224-232-53.compute-1.amazonaws.com "sudo docker pull caminhacaio/dock-product-api:latest; sudo docker rm $(docker ps -a -q); sudo docker run -d -p 8085:8085 caminhacaio/dock-product-api"
